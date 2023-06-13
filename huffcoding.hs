@@ -93,3 +93,38 @@ inTable ht s
     | otherwise = (True,fst (head code_tuple )) 
     where
         code_tuple = filter (\(c,code)->s==code ) ht
+
+-- decodeText :: HuffTable -> String -> String
+
+getFirstCode :: HuffTable -> String -> (String, Char)
+getFirstCode ht bits = head [ (bs,char) | bs<- [ take  n bits | n<-[1..]  ], let (bool,char) = inTable ht bs, bool ] 
+
+decodeText :: HuffTable -> String -> String
+decodeText _ "" = ""
+decodeText ht bits = char : decodeText ht (drop (length code) bits) 
+    where
+        (code,char) =  getFirstCode ht bits
+
+-- following code for decodeText'
+getChar' :: HuffTable -> String -> Maybe Char
+getChar' tbl prefix = if null code_list then Nothing else Just (fst(head code_list))
+    where
+        code_list = filter (\(c,code)->code == prefix) tbl
+
+firstChar tbl n text = f code
+    where 
+        code = getChar' tbl (take n text)
+        f Nothing = firstChar tbl (n+1) text
+        f (Just c) = c
+
+decodeText':: HuffTable -> String -> String
+decodeText' _ [] = []
+decodeText' tbl codes = c : decodeText' tbl (drop len codes)
+    where 
+        c = firstChar tbl 1 codes
+        code = encodeChar tbl c
+        len = length code
+     
+
+
+
